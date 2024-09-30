@@ -7,16 +7,18 @@
 
 BOOST_AUTO_TEST_SUITE(LogManagerTestSuit)
 
+namespace LogNs = SmartHouse::Logging::Stm32;
+
 BOOST_AUTO_TEST_CASE(TestGetLogger)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("general");
 	BOOST_CHECK(logger.GetName() == "general");
 }
 
 BOOST_AUTO_TEST_CASE(TestLoggerDebug)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("general");
 	auto& sink = logManager.GetSinkRef();
 
@@ -27,7 +29,7 @@ BOOST_AUTO_TEST_CASE(TestLoggerDebug)
 
 BOOST_AUTO_TEST_CASE(TestLoggerInfo)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("SomeName");
 	auto& sink = logManager.GetSinkRef();
 
@@ -41,7 +43,7 @@ BOOST_AUTO_TEST_CASE(TestLoggerInfo)
 
 BOOST_AUTO_TEST_CASE(TestLoggerWarn)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("general");
 	auto& sink = logManager.GetSinkRef();
 
@@ -55,7 +57,7 @@ BOOST_AUTO_TEST_CASE(TestLoggerWarn)
 
 BOOST_AUTO_TEST_CASE(TestLoggerError)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("AnotherName");
 	auto& sink = logManager.GetSinkRef();
 
@@ -69,7 +71,7 @@ BOOST_AUTO_TEST_CASE(TestLoggerError)
 
 BOOST_AUTO_TEST_CASE(TestLoggerCritical)
 {
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider>();
 	auto logger = logManager.GetLogger("1234");
 	auto& sink = logManager.GetSinkRef();
 
@@ -79,6 +81,16 @@ BOOST_AUTO_TEST_CASE(TestLoggerCritical)
 	spdlog::info("Logger message: {}", sink.GetMessageBuffer()[0]);
 
 	BOOST_CHECK(sink.GetMessageBuffer()[0] == "[0] [    1234    ] [critical] My name is John Doe and I am 56 years old\n");
+}
+
+BOOST_AUTO_TEST_CASE(TestLoggerNoDebugger)
+{
+	auto logManager = LogNs::LogManager<LogNs::MemBufLogSink, LogNs::CounterTimestampProvider, LogNs::DummyDebuggerDetector<false>>();
+	auto logger = logManager.GetLogger("1234");
+	auto& sink = logManager.GetSinkRef();
+
+	logger.Critical("My name is %s and I am %d years old", "John Doe", 56);
+	BOOST_CHECK(sink.GetMessageBuffer().size() == 0);
 }
 
 

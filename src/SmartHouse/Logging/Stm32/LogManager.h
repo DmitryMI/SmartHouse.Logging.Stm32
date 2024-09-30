@@ -7,35 +7,36 @@
 #include <stdarg.h>
 #include <array>
 #include "TickTimestampProvider.h"
+#include "DummyDebuggerDetector.h"
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<typename TLogSink, typename TTimestampProvider = TickTimestampProvider<>, LogLevel::Level TMinLevel = LogLevel::Level::Info, int TMaxLogMessageSize = 80>
+	template<typename TLogSink, typename TTimestampProvider = TickTimestampProvider<>, typename TDebuggerDetector = DummyDebuggerDetector<true>, LogLevel::Level TMinLevel = LogLevel::Level::Info, int TMaxLogMessageSize = 80>
 	class LogManager
 	{
 	public:
 		static constexpr int OuterFormatExtraSize = 56;
 		static constexpr int LoggerNameMaxLength = 12;
 
-		static LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>& GetInstanceRef()
+		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& GetInstanceRef()
 		{
 			return Instance;
 		}
 
-		static void SetInstance(const LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>& logManager)
+		static void SetInstance(const LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& logManager)
 		{
 			Instance = logManager;
 		}
 
-		static void SetInstanceMove(LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>& logManager)
+		static void SetInstanceMove(LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& logManager)
 		{
 			Instance = std::move(logManager);
 		}
 
 		template<LogLevel::Level TLoggerLevel = TMinLevel>
-		Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>> GetLogger(std::string_view loggerName)
+		Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>> GetLogger(std::string_view loggerName)
 		{
-			return Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>>(loggerName, *this);
+			return Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>>(loggerName, *this);
 		}
 
 		template<LogLevel::Level TMessageLevel>
@@ -59,15 +60,26 @@ namespace SmartHouse::Logging::Stm32
 			return m_TimestampProvider;
 		}
 
+		TDebuggerDetector& GetDebuggerDetectorRef()
+		{
+			return m_DebuggerDetector;
+		}
+
 	private:
-		static LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize> Instance;
+		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize> Instance;
 
 		TLogSink m_Sink;
 		TTimestampProvider m_TimestampProvider;
+		TDebuggerDetector m_DebuggerDetector;
 
 		template<LogLevel::Level TMessageLevel>
 		void LogInternal(std::string_view loggerName, const char* format, va_list args)
 		{
+			if (!m_DebuggerDetector.IsDebuggerPresent())
+			{
+				return;
+			}
+
 			std::array<char, TMaxLogMessageSize + 1> logInnerBuffer;
 			std::array<char, OuterFormatExtraSize + TMaxLogMessageSize + 1> logOuterBuffer;
 
@@ -127,6 +139,6 @@ namespace SmartHouse::Logging::Stm32
 		}
 	};
 
-	template<typename TLogSink, typename TTimestampProvider, LogLevel::Level TMinLevel, int TMaxLogMessageSize>
-	LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize> LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>::Instance;
+	template<typename TLogSink, typename TTimestampProvider, typename TDebuggerDetector, LogLevel::Level TMinLevel, int TMaxLogMessageSize>
+	LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize> LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>::Instance;
 }

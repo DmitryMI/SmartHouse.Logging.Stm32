@@ -9,7 +9,7 @@
 namespace SmartHouse::Logging::Stm32
 {
 	template<HAL_GPIO_TypeDef TGpio, uint16_t TPin, int TDetectionLevel = 0>
-	class GpioDetector
+	class GpioDebuggerDetector
 	{
 	public:
 		bool IsDebuggerPresent() const
