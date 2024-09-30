@@ -86,7 +86,7 @@ namespace SmartHouse::Logging::Stm32
 				return;
 			}
 
-			m_LogManager.Log<TMessageLevel>(m_Name, format, args);
+			m_LogManager.template Log<TMessageLevel> (m_Name, format, args);
 		}
 
 		TLogManager& m_LogManager;

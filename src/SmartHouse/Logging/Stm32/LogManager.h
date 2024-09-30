@@ -70,7 +70,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			std::array<char, TMaxLogMessageSize + 1> logInnerBuffer;
 			std::array<char, OuterFormatExtraSize + TMaxLogMessageSize + 1> logOuterBuffer;
-			
+
 			int loggerNamePadding = (LoggerNameMaxLength - (int)loggerName.size()) / 2;
 			if (loggerNamePadding < 0)
 			{
@@ -102,11 +102,29 @@ namespace SmartHouse::Logging::Stm32
 			{
 				return;
 			}
+#elif defined(__GNUC__)
+			int innerMessageSize = vsprintf(logInnerBuffer.data(), format, args);
+			if (innerMessageSize <= 0)
+			{
+				return;
+			}
+
+			int outerMessageSize = sprintf(logOuterBuffer.data(), "[%s] [%*s%s%*s] [%*s%s%*s] %s\n",
+					m_TimestampProvider.GetTimestampString().c_str(),
+					loggerNamePadding + loggerNameExtraPadding, "", loggerName.data(), loggerNamePadding, "",
+					levelPadding + levelExtraPadding, "", levelStr.data(), levelPadding, "",
+					logInnerBuffer.data()
+			);
+
+			if (outerMessageSize <= 0)
+			{
+				return;
+			}
 #else
 #error "This compiler is not supported!"
 #endif
 			m_Sink.Send(logOuterBuffer.data(), outerMessageSize);
-		}		
+		}
 	};
 
 	template<typename TLogSink, typename TTimestampProvider, LogLevel::Level TMinLevel, int TMaxLogMessageSize>

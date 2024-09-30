@@ -54,6 +54,8 @@ namespace SmartHouse::Logging::Stm32
 				return "critical";
 			case LogLevel::Level::NoLevel:
 				return "nolevel";
+			case LogLevel::Level::MAX:
+				return "nolevel";
 			}
 
 			return "nolevel";
