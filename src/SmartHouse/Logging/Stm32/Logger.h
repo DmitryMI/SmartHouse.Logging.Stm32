@@ -21,7 +21,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			va_list argptr;
 			va_start(argptr, format);
-			LogInternal<TMessageLevel>(format, argptr)
+			LogInternal<TMessageLevel>(format, argptr);
 			va_end(argptr);
 		}
 
