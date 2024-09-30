@@ -16,7 +16,8 @@ namespace SmartHouse::Logging::Stm32
 	public:
 		bool IsDebuggerPresent() const
 		{
-			return HAL_GPIO_ReadPin(reinterpret_cast<GPIO_TypeDef*>(TGpio), TPin) == TDetectionLevel;
+			auto gpioLevel = HAL_GPIO_ReadPin(reinterpret_cast<GPIO_TypeDef*>(TGpio), TPin);
+			return gpioLevel == TDetectionLevel;
 		}
 	};
 }
