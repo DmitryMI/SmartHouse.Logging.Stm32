@@ -2,13 +2,13 @@
 
 #ifdef _MSC_VER
 	#include <stdio.h>
-	using USART_TypeDef = void*;
+	using UART_HandleTypeDef = uin64_t;
 	#define HAL_UART_Transmit(instance, buffer, data, timeout) printf("%s\n", buffer);
 #endif
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<USART_TypeDef TUsartInstance, int TTimeout = 1000>
+	template<UART_HandleTypeDef* TUsartInstance, int TTimeout = 1000>
 	class UartLogSink
 	{
 	public:
