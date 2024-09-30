@@ -22,9 +22,14 @@ namespace SmartHouse::Logging::Stm32
 			return Instance;
 		}
 
-		static void SetInstance(LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize> logManager)
+		static void SetInstance(const LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>& logManager)
 		{
 			Instance = logManager;
+		}
+
+		static void SetInstanceMove(LogManager<TLogSink, TTimestampProvider, TMinLevel, TMaxLogMessageSize>& logManager)
+		{
+			Instance = std::move(logManager);
 		}
 
 		template<LogLevel::Level TLoggerLevel = TMinLevel>
