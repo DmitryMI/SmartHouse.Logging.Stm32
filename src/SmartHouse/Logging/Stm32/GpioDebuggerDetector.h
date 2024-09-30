@@ -1,14 +1,16 @@
 #pragma once
 
+#include <stdint.h>
+
 #ifdef _MSC_VER
-	using GPIO_TypeDef = void*;
+	using GPIO_TypeDef = uint64_t;
 	#define HAL_GPIO_ReadPin(port, pin) (0);
 #endif
 
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<GPIO_TypeDef TGpio, uint16_t TPin, int TDetectionLevel = 0>
+	template<GPIO_TypeDef* TGpio, uint16_t TPin, int TDetectionLevel = 0>
 	class GpioDebuggerDetector
 	{
 	public:
