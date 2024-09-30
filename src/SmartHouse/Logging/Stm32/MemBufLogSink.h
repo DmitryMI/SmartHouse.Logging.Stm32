@@ -5,7 +5,7 @@
 
 namespace SmartHouse::Logging::Stm32
 {
-	class LogSinkMemBuf
+	class MemBufLogSink
 	{
 	public:
 		void Send(const char* buffer, size_t size)

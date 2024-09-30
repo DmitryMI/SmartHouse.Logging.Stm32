@@ -8,7 +8,7 @@ using USART_TypeDef = void*
 
 namespace SmartHouse::Logging::Stm32
 {
-	class LogSinkSerialWire
+	class SwvLogSink
 	{
 	public:
 		void Send(const char* buffer, size_t size)

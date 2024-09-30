@@ -28,7 +28,7 @@ namespace SmartHouse::Logging::Stm32
 			for (uint8_t i = 0; i < maxLevelEnum; i++)
 			{
 				const Level level = static_cast<Level>(i);
-				const int len = ToString(level).size();
+				const int len = (int)ToString(level).size();
 				if (maxLen < len)
 				{
 					maxLen = len;

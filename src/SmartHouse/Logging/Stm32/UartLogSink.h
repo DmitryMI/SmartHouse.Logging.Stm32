@@ -9,7 +9,7 @@
 namespace SmartHouse::Logging::Stm32
 {
 	template<USART_TypeDef TUsartInstance, int TTimeout = 1000>
-	class LogSinkUart
+	class UartLogSink
 	{
 	public:
 		void Send(const char* buffer, size_t size)

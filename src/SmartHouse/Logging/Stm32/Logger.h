@@ -12,7 +12,7 @@ namespace SmartHouse::Logging::Stm32
 	class Logger
 	{
 	public:
-		Logger(std::string_view name) : m_Name(name)
+		Logger(std::string_view name, TLogManager& manager) : m_Name(name), m_LogManager(manager)
 		{
 		}
 
@@ -34,7 +34,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			va_list argptr;
 			va_start(argptr, format);
-			LogInternal<LogLevel::Level::Debug>(format, argptr)
+			LogInternal<LogLevel::Level::Debug>(format, argptr);
 			va_end(argptr);
 		}
 
@@ -50,7 +50,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			va_list argptr;
 			va_start(argptr, format);
-			LogInternal<LogLevel::Level::Warn>(format, argptr)
+			LogInternal<LogLevel::Level::Warn>(format, argptr);
 			va_end(argptr);
 		}
 
@@ -58,7 +58,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			va_list argptr;
 			va_start(argptr, format);
-			LogInternal<LogLevel::Level::Error>(format, argptr)
+			LogInternal<LogLevel::Level::Error>(format, argptr);
 			va_end(argptr);
 		}
 
@@ -66,7 +66,7 @@ namespace SmartHouse::Logging::Stm32
 		{
 			va_list argptr;
 			va_start(argptr, format);
-			LogInternal<LogLevel::Level::Critical>(format, argptr)
+			LogInternal<LogLevel::Level::Critical>(format, argptr);
 			va_end(argptr);
 		}
 
@@ -86,7 +86,9 @@ namespace SmartHouse::Logging::Stm32
 				return;
 			}
 
-			TLogManager::Log<TMessageLevel>(m_Name, format, args);
+			m_LogManager.Log<TMessageLevel>(m_Name, format, args);
 		}
+
+		TLogManager& m_LogManager;
 	};
 }
