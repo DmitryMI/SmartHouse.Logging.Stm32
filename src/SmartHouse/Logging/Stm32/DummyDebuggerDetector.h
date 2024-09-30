@@ -1,5 +1,3 @@
-#pragma
-
 #pragma once
 
 

@@ -10,13 +10,13 @@
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<GPIO_TypeDef* TGpio, uint16_t TPin, int TDetectionLevel = 0>
+	template<uint32_t TGpio, uint16_t TPin, int TDetectionLevel = 0>
 	class GpioDebuggerDetector
 	{
 	public:
 		bool IsDebuggerPresent() const
 		{
-			return HAL_GPIO_ReadPin(TGpio, TPin) == TDetectionLevel;
+			return HAL_GPIO_ReadPin(reinterpret_cast<GPIO_TypeDef*>(TGpio), TPin) == TDetectionLevel;
 		}
 	};
 }
