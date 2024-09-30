@@ -80,6 +80,8 @@ namespace SmartHouse::Logging::Stm32
 				return;
 			}
 
+			int outerMessageSize = 0;
+
 			std::array<char, TMaxLogMessageSize + 1> logInnerBuffer;
 			std::array<char, OuterFormatExtraSize + TMaxLogMessageSize + 1> logOuterBuffer;
 
@@ -102,7 +104,7 @@ namespace SmartHouse::Logging::Stm32
 				return;
 			}
 			
-			int outerMessageSize = sprintf_s(logOuterBuffer.data(), logOuterBuffer.size(), 
+			outerMessageSize = sprintf_s(logOuterBuffer.data(), logOuterBuffer.size(),
 				"[%s] [%*s%s%*s] [%*s%s%*s] %s\n", 
 				m_TimestampProvider.GetTimestampString().c_str(),
 				loggerNamePadding + loggerNameExtraPadding, "", loggerName.data(), loggerNamePadding, "",
@@ -115,13 +117,14 @@ namespace SmartHouse::Logging::Stm32
 				return;
 			}
 #elif defined(__GNUC__)
+
 			int innerMessageSize = vsprintf(logInnerBuffer.data(), format, args);
 			if (innerMessageSize <= 0)
 			{
 				return;
 			}
 
-			int outerMessageSize = sprintf(logOuterBuffer.data(), "[%s] [%*s%s%*s] [%*s%s%*s] %s\n",
+			outerMessageSize = sprintf(logOuterBuffer.data(), "[%s] [%*s%s%*s] [%*s%s%*s] %s\n",
 					m_TimestampProvider.GetTimestampString().c_str(),
 					loggerNamePadding + loggerNameExtraPadding, "", loggerName.data(), loggerNamePadding, "",
 					levelPadding + levelExtraPadding, "", levelStr.data(), levelPadding, "",
@@ -132,6 +135,7 @@ namespace SmartHouse::Logging::Stm32
 			{
 				return;
 			}
+
 #else
 #error "This compiler is not supported!"
 #endif
