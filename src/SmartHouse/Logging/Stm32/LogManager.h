@@ -80,6 +80,10 @@ namespace SmartHouse::Logging::Stm32
 
 #ifdef _MSC_VER
 			int innerMessageSize = vsprintf_s(logInnerBuffer.data(), logInnerBuffer.size(), format, args);
+			if (innerMessageSize <= 0)
+			{
+				return;
+			}
 			
 			int outerMessageSize = sprintf_s(logOuterBuffer.data(), logOuterBuffer.size(), 
 				"[%s] [%*s%s%*s] [%*s%s%*s] %s\n", 
@@ -88,6 +92,11 @@ namespace SmartHouse::Logging::Stm32
 				levelPadding + levelExtraPadding, "", levelStr.data(), levelPadding, "",
 				logInnerBuffer.data()
 			);
+
+			if (outerMessageSize <= 0)
+			{
+				return;
+			}
 #else
 #error "This compiler is not supported!"
 #endif

@@ -14,6 +14,17 @@ BOOST_AUTO_TEST_CASE(TestGetLogger)
 	BOOST_CHECK(logger.GetName() == "general");
 }
 
+BOOST_AUTO_TEST_CASE(TestLoggerDebug)
+{
+	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
+	auto logger = logManager.GetLogger("general");
+	auto& sink = logManager.GetSinkRef();
+
+	logger.Debug("My name is %s and I am %d years old", "John Doe", 56);
+	BOOST_CHECK(sink.GetMessageBuffer().size() == 0);
+}
+
+
 BOOST_AUTO_TEST_CASE(TestLoggerInfo)
 {
 	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
@@ -26,16 +37,6 @@ BOOST_AUTO_TEST_CASE(TestLoggerInfo)
 	spdlog::info("Logger message: {}", sink.GetMessageBuffer()[0]);
 
 	BOOST_CHECK(sink.GetMessageBuffer()[0] == "[0] [  SomeName  ] [  info  ] My name is John Doe and I am 56 years old\n");
-}
-
-BOOST_AUTO_TEST_CASE(TestLoggerDebug)
-{
-	auto logManager = SmartHouse::Logging::Stm32::LogManager<SmartHouse::Logging::Stm32::MemBufLogSink, SmartHouse::Logging::Stm32::CounterTimestampProvider>();
-	auto logger = logManager.GetLogger("general");
-	auto& sink = logManager.GetSinkRef();
-
-	logger.Debug("My name is %s and I am %d years old", "John Doe", 56);
-	BOOST_CHECK(sink.GetMessageBuffer().size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(TestLoggerWarn)
@@ -79,5 +80,6 @@ BOOST_AUTO_TEST_CASE(TestLoggerCritical)
 
 	BOOST_CHECK(sink.GetMessageBuffer()[0] == "[0] [    1234    ] [critical] My name is John Doe and I am 56 years old\n");
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()
