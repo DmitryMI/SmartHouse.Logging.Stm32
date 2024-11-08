@@ -8,35 +8,36 @@
 #include <array>
 #include "TickTimestampProvider.h"
 #include "DummyDebuggerDetector.h"
+#include "SprintfFormatter.h"
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<typename TLogSink, typename TTimestampProvider = TickTimestampProvider<>, typename TDebuggerDetector = DummyDebuggerDetector<true>, LogLevel::Level TMinLevel = LogLevel::Level::Info, int TMaxLogMessageSize = 80>
+	template<typename TLogSink, typename TTimestampProvider = TickTimestampProvider<>, typename TDebuggerDetector = DummyDebuggerDetector<true>, typename TFormatter = SprintfFormatter, LogLevel::Level TMinLevel = LogLevel::Level::Info, int TMaxLogMessageSize = 80>
 	class LogManager
 	{
 	public:
 		static constexpr int OuterFormatExtraSize = 56;
 		static constexpr int LoggerNameMaxLength = 12;
 
-		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& GetInstanceRef()
+		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>& GetInstanceRef()
 		{
 			return Instance;
 		}
 
-		static void SetInstance(const LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& logManager)
+		static void SetInstance(const LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>& logManager)
 		{
 			Instance = logManager;
 		}
 
-		static void SetInstanceMove(LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>& logManager)
+		static void SetInstanceMove(LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>& logManager)
 		{
 			Instance = std::move(logManager);
 		}
 
 		template<LogLevel::Level TLoggerLevel = TMinLevel>
-		Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>> GetLogger(std::string_view loggerName)
+		Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>> GetLogger(std::string_view loggerName)
 		{
-			return Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>>(loggerName, *this);
+			return Logger<TLoggerLevel, LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>>(loggerName, *this);
 		}
 
 		template<LogLevel::Level TMessageLevel>
@@ -66,11 +67,12 @@ namespace SmartHouse::Logging::Stm32
 		}
 
 	private:
-		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize> Instance;
+		static LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize> Instance;
 
 		TLogSink m_Sink;
 		TTimestampProvider m_TimestampProvider;
 		TDebuggerDetector m_DebuggerDetector;
+		TFormatter m_Formatter;
 
 		template<LogLevel::Level TMessageLevel>
 		void LogInternal(std::string_view loggerName, const char* format, va_list args)
@@ -97,15 +99,14 @@ namespace SmartHouse::Logging::Stm32
 			constexpr int levelPadding = (levelMaxLength - (int)levelStr.size()) / 2;
 			constexpr int levelExtraPadding = (int)levelStr.size() % 2 == 0 ? 0 : 1;
 
-#ifdef _MSC_VER
-			int innerMessageSize = vsprintf_s(logInnerBuffer.data(), logInnerBuffer.size(), format, args);
+			int innerMessageSize = m_Formatter.AsVsnprintf(logInnerBuffer.data(), logInnerBuffer.size(), format, args);
 			if (innerMessageSize <= 0)
 			{
 				return;
 			}
-			
-			outerMessageSize = sprintf_s(logOuterBuffer.data(), logOuterBuffer.size(),
-				"[%s] [%*s%s%*s] [%*s%s%*s] %s\n", 
+
+			outerMessageSize = m_Formatter.AsSnprintf(logOuterBuffer.data(), logOuterBuffer.size(),
+				"[%s] [%*s%s%*s] [%*s%s%*s] %s\n",
 				m_TimestampProvider.GetTimestampString().c_str(),
 				loggerNamePadding + loggerNameExtraPadding, "", loggerName.data(), loggerNamePadding, "",
 				levelPadding + levelExtraPadding, "", levelStr.data(), levelPadding, "",
@@ -116,33 +117,11 @@ namespace SmartHouse::Logging::Stm32
 			{
 				return;
 			}
-#elif defined(__GNUC__)
-
-			int innerMessageSize = vsprintf(logInnerBuffer.data(), format, args);
-			if (innerMessageSize <= 0)
-			{
-				return;
-			}
-
-			outerMessageSize = sprintf(logOuterBuffer.data(), "[%s] [%*s%s%*s] [%*s%s%*s] %s\n",
-					m_TimestampProvider.GetTimestampString().c_str(),
-					loggerNamePadding + loggerNameExtraPadding, "", loggerName.data(), loggerNamePadding, "",
-					levelPadding + levelExtraPadding, "", levelStr.data(), levelPadding, "",
-					logInnerBuffer.data()
-			);
-
-			if (outerMessageSize <= 0)
-			{
-				return;
-			}
-
-#else
-#error "This compiler is not supported!"
-#endif
+			
 			m_Sink.Send(logOuterBuffer.data(), outerMessageSize);
 		}
 	};
 
-	template<typename TLogSink, typename TTimestampProvider, typename TDebuggerDetector, LogLevel::Level TMinLevel, int TMaxLogMessageSize>
-	LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize> LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TMinLevel, TMaxLogMessageSize>::Instance;
+	template<typename TLogSink, typename TTimestampProvider, typename TDebuggerDetector, typename TFormatter, LogLevel::Level TMinLevel, int TMaxLogMessageSize>
+	LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize> LogManager<TLogSink, TTimestampProvider, TDebuggerDetector, TFormatter, TMinLevel, TMaxLogMessageSize>::Instance;
 }

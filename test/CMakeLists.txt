@@ -19,6 +19,7 @@ set(AppSources
 set(TestUtilsSources "TestUtils/Logging.cpp" "TestUtils/TestModule.cpp")
 set(TestSuitsSources 
 	"SmartHouse/Logging/Stm32/LogManagerTest.cpp"
+	"SmartHouse/Logging/Stm32/SmallFormatterTest.cpp"
 )
 
 enable_testing()
@@ -30,7 +31,7 @@ find_package(spdlog CONFIG REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package( Boost 1.80 REQUIRED COMPONENTS program_options unit_test_framework)
 
-add_executable(SmarthHouseLoggingStm32Test  ${AppSources} ${TestUtilsSources} ${TestSuitsSources})
+add_executable(SmarthHouseLoggingStm32Test  ${AppSources} ${TestUtilsSources} ${TestSuitsSources} "SmartHouse/Logging/Stm32/SmallFormatterTest.cpp")
 target_include_directories(SmarthHouseLoggingStm32Test PRIVATE "TestUtils")
 target_include_directories(SmarthHouseLoggingStm32Test PRIVATE "../src/SmartHouse/Logging/Stm32/")
 target_link_libraries(SmarthHouseLoggingStm32Test PRIVATE spdlog::spdlog)

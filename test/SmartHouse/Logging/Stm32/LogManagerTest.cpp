@@ -4,6 +4,7 @@
 #include "LogManager.h"
 #include "MemBufLogSink.h"
 #include "CounterTimestampProvider.h"
+#include "SmallFormatter.h"
 
 BOOST_AUTO_TEST_SUITE(LogManagerTestSuit)
 
@@ -91,6 +92,23 @@ BOOST_AUTO_TEST_CASE(TestLoggerNoDebugger)
 
 	logger.Critical("My name is %s and I am %d years old", "John Doe", 56);
 	BOOST_CHECK(sink.GetMessageBuffer().size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(TestLoggerSmallFormatter)
+{
+	auto logManager = LogNs::LogManager<
+		LogNs::MemBufLogSink,
+		LogNs::CounterTimestampProvider,
+		LogNs::DummyDebuggerDetector<true>,
+		LogNs::SmallFormatter
+	>();
+
+	auto logger = logManager.GetLogger("1234");
+	auto& sink = logManager.GetSinkRef();
+
+	logger.Critical("My name is %s and I am %d years old", "John Doe", 56);
+	spdlog::info("Logger message: {}", sink.GetMessageBuffer()[0]);
+	BOOST_CHECK(sink.GetMessageBuffer()[0] == "[0] [1234] [critical] My name is John Doe and I am 56 years old\n");
 }
 
 
