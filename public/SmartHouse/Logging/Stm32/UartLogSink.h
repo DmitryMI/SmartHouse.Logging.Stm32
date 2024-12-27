@@ -16,7 +16,7 @@ namespace SmartHouse::Logging::Stm32
 	public:
 		void Send(uint8_t c)
 		{
-			HAL_UART_Transmit(&huart1, (const uint8_t*)c, 1, TTimeout);
+			HAL_UART_Transmit(&huart1, &c, 1, TTimeout);
 		}
 	};
 }
