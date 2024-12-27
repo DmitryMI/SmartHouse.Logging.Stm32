@@ -29,8 +29,8 @@ foreach(ABS_PATH IN LISTS SmartHouse.Logging.Stm32.Headers.Absolute)
     message(STATUS "\t${ABS_PATH}")
 endforeach()
 
-set(SmartHouse.Logging.Stm32.Headers ${SmartHouse.Logging.Stm32.Headers.Absolute} PARENT_SCOPE)
-set(SmartHouse.Logging.Stm32.Sources ${SmartHouse.Logging.Stm32.Sources.Absolute} PARENT_SCOPE)
+set(SmartHouse.Logging.Stm32.Headers ${SmartHouse.Logging.Stm32.Headers.Absolute} CACHE STRING "List of include directories")
+set(SmartHouse.Logging.Stm32.Sources ${SmartHouse.Logging.Stm32.Sources.Absolute} CACHE STRING "List of source files")
 
 
 # add_library(SmartHouse.Logging.Stm32 ${AppSources})
