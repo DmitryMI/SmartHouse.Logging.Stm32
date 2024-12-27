@@ -5,6 +5,7 @@
 #include "DummyDebuggerDetector.h"
 #include "LogLevel.h"
 #include "TickTimestampProvider.h"
+#include <functional>
 
 #ifndef __GNUC__
 #include <array>
@@ -12,10 +13,17 @@
 
 namespace SmartHouse::Logging::Stm32
 {
+	extern std::function<void(uint8_t)> LogManagerPutCharCallback;
+
 	template<typename TLogSink, typename TTimestampProvider = TickTimestampProvider, typename TDebuggerDetector = DummyDebuggerDetector<true>, LogLevel::Level TMinLevel = LogLevel::Level::Info>
 	class LogManager
 	{
 	public:
+
+		static void Init()
+		{
+			LogManagerPutCharCallback = PutCharCallback;
+		}
 
 		template<LogLevel::Level TMessageLevel>
 		static void Log(std::string_view loggerName, const char* format, va_list args)
@@ -44,6 +52,8 @@ namespace SmartHouse::Logging::Stm32
 				PutCharCallback(buffer[i]);
 			}
 #endif
+			
+			PutCharCallback('\n');
 		}
 
 		static TDebuggerDetector& GetDebuggerDetectorRef()

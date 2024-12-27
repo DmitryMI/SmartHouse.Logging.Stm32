@@ -4,12 +4,22 @@
 #include <unistd.h>
 #endif
 
+namespace SmartHouse::Logging::Stm32
+{
+	void LogManagerPutCharCallbackPlaceholder(uint8_t c)
+	{
+
+	}
+
+	std::function<void(uint8_t)> LogManagerPutCharCallback = LogManagerPutCharCallbackPlaceholder;
+}
+
 extern "C"
 {
 #ifdef __GNUC__
 	int __io_putchar(int ch)
 	{
-		GLogManager.PutCharCallback(ch);
+		LogManagerPutCharCallback(ch);
 		return ch;
 	}
 
@@ -21,7 +31,7 @@ extern "C"
 		case STDERR_FILENO:
 			for (int i = 0; i < len; i++)
 			{
-				GLogManager.PutCharCallback(ch);
+				LogManagerPutCharCallback(ch);
 			}
 			break;
 		case STDIN_FILENO:

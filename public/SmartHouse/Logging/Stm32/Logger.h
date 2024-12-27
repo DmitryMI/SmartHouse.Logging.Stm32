@@ -13,6 +13,7 @@ namespace SmartHouse::Logging::Stm32
 	public:
 		Logger(std::string_view name) : m_Name(name)
 		{
+			TLogManagerType::Init();
 		}
 
 		std::string_view GetName() const
