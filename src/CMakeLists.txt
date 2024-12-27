@@ -6,17 +6,17 @@ set(SmartHouse.Logging.Stm32.Sources.Relative
 
 set(SmartHouse.Logging.Stm32.Headers.Relative "../public")
 
-set(SmartHouse.Logging.Stm32.Headers PARENT_SCOPE)
-set(SmartHouse.Logging.Stm32.Sources PARENT_SCOPE)
+set(SmartHouse.Logging.Stm32.Headers.Absolute PARENT_SCOPE)
+set(SmartHouse.Logging.Stm32.Sources.Absolute PARENT_SCOPE)
 
 foreach(REL_PATH IN LISTS SmartHouse.Logging.Stm32.Headers.Relative)
     get_filename_component(ABS_PATH "${REL_PATH}" ABSOLUTE)
-    list(APPEND SmartHouse.Logging.Stm32.Headers "${ABS_PATH}")
+    list(APPEND SmartHouse.Logging.Stm32.Headers.Absolute "${ABS_PATH}")
 endforeach()
 
 foreach(REL_PATH IN LISTS SmartHouse.Logging.Stm32.Sources.Relative)
     get_filename_component(ABS_PATH "${REL_PATH}" ABSOLUTE)
-    list(APPEND SmartHouse.Logging.Stm32.Sources "${ABS_PATH}")
+    list(APPEND SmartHouse.Logging.Stm32.Sources.Absolute "${ABS_PATH}")
 endforeach()
 
 message(STATUS "SmartHouse.Logging.Stm32.Sources: ")
@@ -28,6 +28,9 @@ message(STATUS "SmartHouse.Logging.Stm32.Headers: ")
 foreach(ABS_PATH IN LISTS SmartHouse.Logging.Stm32.Headers)
     message(STATUS "${ABS_PATH}")
 endforeach()
+
+set(SmartHouse.Logging.Stm32.Headers ${SmartHouse.Logging.Stm32.Headers.Absolute} PARENT_SCOPE)
+set(SmartHouse.Logging.Stm32.Sources ${SmartHouse.Logging.Stm32.Sources.Absolute} PARENT_SCOPE)
 
 
 # add_library(SmartHouse.Logging.Stm32 ${AppSources})
