@@ -8,7 +8,7 @@ namespace SmartHouse::Logging::Stm32
 {
 	void LogManagerPutCharCallbackPlaceholder(uint8_t c)
 	{
-
+		(void)c;
 	}
 
 	std::function<void(uint8_t)> LogManagerPutCharCallback = LogManagerPutCharCallbackPlaceholder;
@@ -19,7 +19,7 @@ extern "C"
 #ifdef __GNUC__
 	int __io_putchar(int ch)
 	{
-		LogManagerPutCharCallback(ch);
+		SmartHouse::Logging::Stm32::LogManagerPutCharCallback(ch);
 		return ch;
 	}
 
@@ -31,7 +31,7 @@ extern "C"
 		case STDERR_FILENO:
 			for (int i = 0; i < len; i++)
 			{
-				LogManagerPutCharCallback(ch);
+				SmartHouse::Logging::Stm32::LogManagerPutCharCallback(ptr[i]);
 			}
 			break;
 		case STDIN_FILENO:

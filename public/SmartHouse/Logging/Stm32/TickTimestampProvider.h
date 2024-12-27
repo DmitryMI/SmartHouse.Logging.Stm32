@@ -6,6 +6,8 @@
 #include <Windows.h>
 #include <sysinfoapi.h>
 #define HAL_GetTick() static_cast<uint32_t>(GetTickCount64());
+#else
+#include "main.h"
 #endif
 
 namespace SmartHouse::Logging::Stm32
