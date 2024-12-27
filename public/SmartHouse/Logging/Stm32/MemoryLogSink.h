@@ -18,6 +18,11 @@ namespace SmartHouse::Logging::Stm32
 			return m_Log;
 		}
 
+		void ClearLog()
+		{
+			m_Log = "";
+		}
+
 	private:
 		std::string m_Log;
 	};
