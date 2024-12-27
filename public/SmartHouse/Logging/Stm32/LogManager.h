@@ -39,7 +39,7 @@ namespace SmartHouse::Logging::Stm32
 			}
 
 #ifdef __GNUC__
-			printf("[%s] [%u] [%s] ", loggerName.data(), m_TimestampProvider.GetTimestamp(), LogLevel::ToString(TMessageLevel).data());
+			printf("[%s] [%ul] [%s] ", loggerName.data(), m_TimestampProvider.GetTimestamp(), LogLevel::ToString(TMessageLevel).data());
 			vprintf(format, args);
 #else
 			std::array<char, 256> buffer;
