@@ -1,7 +1,10 @@
-﻿# CMakeList.txt : CMake project for SmartHouse.Logging.Stm32, include source and define
-# project specific logic here.
+﻿# CMakeList.txt : Top-level CMake project file, do global configuration
+# and include sub-projects here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.20)
+
+option(SMARTHOUSE_BUILD_TESTS "Build unit tests" OFF)
+
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -14,4 +17,8 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md-v143" CACHE STRING "VCPKG Target
 project ("SmartHouse")
 
 # Include sub-projects.
-add_subdirectory ("test")
+add_subdirectory("src")
+
+if(SMARTHOUSE_BUILD_TESTS)
+	add_subdirectory("test")
+endif()

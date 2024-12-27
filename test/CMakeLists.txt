@@ -1,9 +1,7 @@
 # set minimum cmake version
 cmake_minimum_required(VERSION 3.20)
 
-set(spdlog_DIR "D:/Software/vcpkg/installed/x64-windows-static-md-v143/share/spdlog" CACHE STRING "Path to spdlog")
-set(fmt_DIR "D:/Software/vcpkg/installed/x64-windows-static-md-v143/share/fmt" CACHE STRING "Path to fmt")
-set(Boost_ROOT "C:/Software/boost_1_85_0" CACHE STRING "Path to Boost")
+include(FetchContent)
 
 # project name and language
 project(SmartHouseSensorsProtocolTest LANGUAGES CXX)
@@ -13,31 +11,46 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(AppSources 
-		
+	"../src/SmartHouse/Logging/Stm32/LogManager.cpp"	
 )
 
 set(TestUtilsSources "TestUtils/Logging.cpp" "TestUtils/TestModule.cpp")
 set(TestSuitsSources 
 	"SmartHouse/Logging/Stm32/LogManagerTest.cpp"
-	"SmartHouse/Logging/Stm32/SmallFormatterTest.cpp"
 )
 
 enable_testing()
 
 # spdlog
-find_package(spdlog CONFIG REQUIRED)
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.15.0
+)
+FetchContent_MakeAvailable(spdlog)
 
 # Boost
 set(Boost_USE_STATIC_LIBS ON)
-find_package( Boost 1.80 REQUIRED COMPONENTS program_options unit_test_framework)
+set(BOOST_INCLUDE_LIBRARIES program_options test)
+set(BOOST_ENABLE_CMAKE ON)
+message(STATUS "Downloading and extracting boost library sources. This will take some time...")
+Set(FETCHCONTENT_QUIET FALSE)
+FetchContent_Declare(
+    Boost
+    URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.7z
+    USES_TERMINAL_DOWNLOAD TRUE 
+    GIT_PROGRESS TRUE   
+    DOWNLOAD_NO_EXTRACT FALSE
+)
+FetchContent_MakeAvailable(Boost)
 
-add_executable(SmarthHouseLoggingStm32Test  ${AppSources} ${TestUtilsSources} ${TestSuitsSources} "SmartHouse/Logging/Stm32/SmallFormatterTest.cpp")
-target_include_directories(SmarthHouseLoggingStm32Test PRIVATE "TestUtils")
-target_include_directories(SmarthHouseLoggingStm32Test PRIVATE "../src/SmartHouse/Logging/Stm32/")
-target_link_libraries(SmarthHouseLoggingStm32Test PRIVATE spdlog::spdlog)
-target_include_directories(SmarthHouseLoggingStm32Test PRIVATE ${Boost_INCLUDE_DIR} )
-target_link_libraries(SmarthHouseLoggingStm32Test PRIVATE ${Boost_LIBRARIES} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_executable(SmarthHouse.Logging.Stm32.Test  ${AppSources} ${TestUtilsSources} ${TestSuitsSources} "SmartHouse/Logging/Stm32/MockTimestampProvider.h")
+target_include_directories(SmarthHouse.Logging.Stm32.Test PRIVATE "TestUtils")
+target_include_directories(SmarthHouse.Logging.Stm32.Test PRIVATE "../public")
+target_link_libraries(SmarthHouse.Logging.Stm32.Test PRIVATE spdlog::spdlog)
+target_include_directories(SmarthHouse.Logging.Stm32.Test PRIVATE ${Boost_INCLUDE_DIR} )
+target_link_libraries(SmarthHouse.Logging.Stm32.Test PRIVATE Boost::unit_test_framework)
 add_test(
-  NAME SmarthHouseLoggingStm32Test
-  COMMAND $<TARGET_FILE:SmarthHouseLoggingStm32Test>
+  NAME SmarthHouse.Logging.Stm32.Test
+  COMMAND $<TARGET_FILE:SmarthHouse.Logging.Stm32.Test>
   )

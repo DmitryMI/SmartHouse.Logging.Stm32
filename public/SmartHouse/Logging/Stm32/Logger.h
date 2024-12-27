@@ -1,6 +1,5 @@
 #pragma once
 
-#include "LogLevel.h"
 #include <string>
 #include <string_view>
 #include <stdio.h>
@@ -8,12 +7,17 @@
 
 namespace SmartHouse::Logging::Stm32
 {
-	template<LogLevel::Level TLevel, typename TLogManager>
+	template<typename TLogManagerType>
 	class Logger
 	{
 	public:
-		Logger(std::string_view name, TLogManager& manager) : m_Name(name), m_LogManager(manager)
+		Logger(std::string_view name) : m_Name(name)
 		{
+		}
+
+		std::string_view GetName() const
+		{
+			return m_Name;
 		}
 
 		template<LogLevel::Level TMessageLevel>
@@ -25,11 +29,6 @@ namespace SmartHouse::Logging::Stm32
 			va_end(argptr);
 		}
 
-		std::string_view GetName() const
-		{
-			return m_Name;
-		}
-		
 		void Debug(const char* format, ...) const
 		{
 			va_list argptr;
@@ -70,25 +69,13 @@ namespace SmartHouse::Logging::Stm32
 			va_end(argptr);
 		}
 
-		TLogManager& GetLogManager() const
-		{
-			return TLogManager::GetInstanceRef();
-		}
-
 	private:
 		std::string_view m_Name;
 
 		template<LogLevel::Level TMessageLevel>
 		void LogInternal(const char* format, va_list args) const
 		{
-			if constexpr (static_cast<uint8_t>(TMessageLevel) < static_cast<uint8_t>(TLevel))
-			{
-				return;
-			}
-
-			m_LogManager.template Log<TMessageLevel> (m_Name, format, args);
+			TLogManagerType::template Log<TMessageLevel>(m_Name, format, args);
 		}
-
-		TLogManager& m_LogManager;
 	};
 }
