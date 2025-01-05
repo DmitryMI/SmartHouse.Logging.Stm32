@@ -53,7 +53,7 @@ namespace SmartHouse::Logging::Stm32
 			}
 #endif
 			
-			PutCharCallback('\n');
+			printf("\n");
 		}
 
 		static TDebuggerDetector& GetDebuggerDetectorRef()
