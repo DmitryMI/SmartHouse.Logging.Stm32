@@ -1,49 +1,53 @@
 #include "spdlog/spdlog.h"
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include "SmartHouse/Logging/Stm32/LogManager.h"
 #include "SmartHouse/Logging/Stm32/MemoryLogSink.h"
+#include "SmartHouse/Logging/Stm32/FuncLogSink.h"
 #include "SmartHouse/Logging/Stm32/DummyDebuggerDetector.h"
 #include "SmartHouse/Logging/Stm32/LogLevel.h"
 #include "SmartHouse/Logging/Stm32/Logger.h"
 #include "MockTimestampProvider.h"
 
 namespace LogNs = SmartHouse::Logging::Stm32;
-using LogManagerType = LogNs::LogManager<LogNs::MemoryLogSink, LogNs::MockTimestampProvider>;
+using LogManagerMemory = LogNs::LogManager<LogNs::MemoryLogSink, LogNs::MockTimestampProvider>;
+using LogManagerFunc = LogNs::LogManager<LogNs::FuncLogSink<[](uint8_t c) {return 0; }>, LogNs::MockTimestampProvider>;
 
-BOOST_AUTO_TEST_SUITE(LogManagerTestSuit)
-
-BOOST_AUTO_TEST_CASE(TestGetName)
+TEST(LogManagerTest, TestGetName)
 {
-	auto logger = LogNs::Logger<LogManagerType>("general");
-	BOOST_CHECK(logger.GetName() == "general");
+	auto logger = LogNs::Logger<LogManagerMemory>("general");
+	EXPECT_EQ(logger.GetName(), "general");
 }
 
-BOOST_AUTO_TEST_CASE(TestInfo)
+TEST(LogManagerTest, TestInfo)
 {
-	LogManagerType::GetLogSinkRef().ClearLog();
-	auto logger = LogNs::Logger<LogManagerType>("general");
+	LogManagerMemory::GetLogSinkRef().ClearLog();
+	auto logger = LogNs::Logger<LogManagerMemory>("general");
 	logger.Info("Hello %s", "World!");
-	std::string actualLog = LogManagerType::GetLogSinkRef().GetLog();
-	BOOST_CHECK(actualLog == "[general] [0] [info] Hello World!\n");
+	std::string actualLog = LogManagerMemory::GetLogSinkRef().GetLog();
+	EXPECT_EQ(actualLog, "[general] [0] [info] Hello World!");
 }
 
-BOOST_AUTO_TEST_CASE(TestError)
+TEST(LogManagerTest, TestError)
 {
-	LogManagerType::GetLogSinkRef().ClearLog();
-	auto logger = LogNs::Logger<LogManagerType>("general");
+	LogManagerMemory::GetLogSinkRef().ClearLog();
+	auto logger = LogNs::Logger<LogManagerMemory>("general");
 	logger.Error("Hello %3.2f!", 123.45);
-	std::string actualLog = LogManagerType::GetLogSinkRef().GetLog();
-	BOOST_CHECK(actualLog == "[general] [0] [error] Hello 123.45!\n");
+	std::string actualLog = LogManagerMemory::GetLogSinkRef().GetLog();
+	EXPECT_EQ(actualLog, "[general] [0] [error] Hello 123.45!");
 }
 
-BOOST_AUTO_TEST_CASE(TestDebug)
+TEST(LogManagerTest, TestDebug)
 {
-	LogManagerType::GetLogSinkRef().ClearLog();
-	auto logger = LogNs::Logger<LogManagerType>("general");
+	LogManagerMemory::GetLogSinkRef().ClearLog();
+	auto logger = LogNs::Logger<LogManagerMemory>("general");
 	logger.Debug("Hello %d!", 123);
-	std::string actualLog = LogManagerType::GetLogSinkRef().GetLog();
-	BOOST_CHECK(actualLog == "");
+	std::string actualLog = LogManagerMemory::GetLogSinkRef().GetLog();
+	EXPECT_EQ(actualLog, "");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+TEST(LogManagerTest, TestFunc)
+{
+	auto logger = LogNs::Logger<LogManagerFunc>("general");
+	logger.Debug("Hello %d!", 123);
+}

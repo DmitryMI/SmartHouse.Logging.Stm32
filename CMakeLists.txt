@@ -1,24 +1,25 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required (VERSION 3.20)
+﻿cmake_minimum_required (VERSION 3.25)
+project("SmartHouse.Logging.Stm32")
 
-option(SMARTHOUSE_BUILD_TESTS "Build unit tests" OFF)
+set(_build_cmake_url "https://raw.githubusercontent.com/DmitryMI/SmartHouse.Build.CMake/refs/heads/main/SmartHouse.Build.CMake.cmake")
+set(_build_cmake_local "${CMAKE_BINARY_DIR}/SmartHouse.Build.CMake.cmake")
 
+if(NOT EXISTS "${_build_cmake_local}")
+    message(STATUS "Downloading ${_build_cmake_url}...")
+    file(DOWNLOAD "${_build_cmake_url}" "${_build_cmake_local}"
+        INACTIVITY_TIMEOUT 60
+        STATUS _status
+        LOG _log
+    )
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+    list(GET _status 0 _status_code)
+    if(NOT _status_code EQUAL 0)
+        message(FATAL_ERROR "Failed to download ${_build_cmake_url}: ${_log}")
+    endif()
+else()
+    message(STATUS "Using cached file: ${_build_cmake_local}")
 endif()
 
-set(VCPKG_TARGET_TRIPLET "x64-windows-static-md-v143" CACHE STRING "VCPKG Target Triplet to use")
-
-project ("SmartHouse")
-
-# Include sub-projects.
-add_subdirectory("src")
-
-if(SMARTHOUSE_BUILD_TESTS)
-	add_subdirectory("test")
-endif()
+# Include the downloaded CMake file
+include("${_build_cmake_local}")
+SmartHouseInitModule()
